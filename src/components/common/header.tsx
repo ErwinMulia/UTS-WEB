@@ -1,4 +1,3 @@
-// Header/Navbar Component
 'use client'
 
 import React, { useState } from 'react';
