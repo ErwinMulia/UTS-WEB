@@ -49,9 +49,9 @@ export function FeaturedEvents() {
           {featuredEvents.map((event) => (
             <div key={event.id} className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition">
               <img 
-                src={event.image} 
-                alt={event.title}
-                className="w-full h-48 object-cover" // Changed to object-contain to prevent cropping
+            src={event.image}
+            alt={event.title}
+            className="w-full h-48 object-cover transition-transform duration-300 hover:scale-105"
               />
               <div className="p-6">
                 <h3 className="text-lg font-semibold mb-2 text-gray-800">{event.title}</h3>
@@ -65,9 +65,9 @@ export function FeaturedEvents() {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="font-bold text-blue-600">{event.price}</span>
-                  <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-500 transition">
-                    Pesan Tiket
-                  </button>
+                  <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 active:scale-95 transition">
+                Pesan Tiket
+                </button>
                 </div>
               </div>
             </div>
