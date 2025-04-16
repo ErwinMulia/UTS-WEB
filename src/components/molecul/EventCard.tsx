@@ -31,9 +31,9 @@ export function EventCard({ event }: EventCardProps) {
         </div>
         <div className="flex justify-between items-center">
           <Text className="font-bold text-blue-600">{event.price}</Text>
-          <Button label="Pesan Tiket" onClick={function (): void {
-            throw new Error('Function not implemented.');
-          } } />
+          <Button onClick={function (): void { throw new Error('Function not implemented.'); }}>
+          Pesan Tiket
+          </Button>
         </div>
       </div>
     </div>
