@@ -1,5 +1,5 @@
 import { useState } from "react";
-import CategoryButton from "../atom/CategoryButton";
+import CategoryButton from "@/components/atom/Categorybutton";
 
 const categories = ["All", "Music", "Sport", "Theatre"];
 
