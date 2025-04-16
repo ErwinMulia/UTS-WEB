@@ -6,7 +6,7 @@ const stats = [
   { value: "10K+", label: "Acara\nTersedia" }
 ];
 
-export default function StatsSection() {
+export default function StatsSections() {
   return (
     <div className="flex flex-wrap gap-6 mb-8">
       {stats.map((stat, index) => (

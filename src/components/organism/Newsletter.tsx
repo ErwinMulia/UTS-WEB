@@ -1,5 +1,4 @@
 import { EmailSubscriptionForm } from '@/components/molecul/EmailSubscriptionForm';
-import { TestimonialCard } from '@/components/molecul/TestimonialCard';
 
 export const Newsletter = () => {
   const testimonials = [
@@ -24,17 +23,23 @@ export const Newsletter = () => {
             <p className="mb-6">Dapatkan info terbaru tentang acara-acara terpopuler langsung ke email Anda</p>
             <EmailSubscriptionForm className="max-w-md mx-auto lg:mx-0" />
           </div>
-
+          
           <div className="lg:w-1/2">
-            <h3 className="text-xl font-semibold mb-4 text-center lg:text-left">Apa kata mereka?</h3>
-            <div className="space-y-6">
+            <h3 className="text-2xl font-semibold text-center lg:text-left mb-6">Apa Kata Mereka?</h3>
+            <div className="flex flex-wrap justify-between gap-8">
               {testimonials.map((testimonial, index) => (
-                <TestimonialCard 
-                  key={index}
-                  rating={testimonial.rating}
-                  text={testimonial.text}
-                  author={testimonial.author}
-                />
+                <div key={index} className="flex-1 min-w-[300px]">
+                  <div className="bg-gray-100 p-6 rounded-lg shadow-md">
+                    <div className="flex mb-4">
+
+                      <span className="text-yellow-500">
+                        {"★".repeat(testimonial.rating)}{"☆".repeat(5 - testimonial.rating)}
+                      </span>
+                    </div>
+                    <p className="text-gray-700 mb-4">{testimonial.text}</p>
+                    <p className="font-semibold">{testimonial.author}</p>
+                  </div>
+                </div>
               ))}
             </div>
           </div>

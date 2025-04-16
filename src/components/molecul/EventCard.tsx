@@ -1,3 +1,5 @@
+'use client';
+
 import { Text } from '../atom/Text';
 import { Icon } from '../atom/Icon';
 import { Button } from '../atom/Button';

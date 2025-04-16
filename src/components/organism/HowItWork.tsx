@@ -1,3 +1,5 @@
+'use client';
+
 import { motion } from 'framer-motion';
 import { SearchIcon, TicketIcon, UserIcon } from 'lucide-react';
 import { StepCard } from '@/components/molecul/StepCard';
@@ -20,10 +22,10 @@ const steps = [
   }
 ];
 
-export const HowItWorks = () => {
+export function HowItWorks() {
   return (
-    <div className="py-16 bg-blue-600">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="py-16 bg-blue-600 px-4 sm:px-10 lg:px-20 w-full"> {/* Full width */}
+      <div className="mx-auto"> {/* Center the content, no max-width */}
         <motion.h2
           className="text-3xl font-bold mb-12 text-center text-white"
           initial={{ opacity: 0, y: -20 }}
