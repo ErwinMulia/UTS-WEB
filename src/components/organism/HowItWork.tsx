@@ -1,26 +1,26 @@
-import { FC } from 'react';
-import { Step } from '@/components/molecul/Step';
 import { motion } from 'framer-motion';
+import { SearchIcon, TicketIcon, UserIcon } from 'lucide-react';
+import { StepCard } from '@/components/molecul/StepCard';
 
 const steps = [
   {
-    icon: 'search',
+    icon: <SearchIcon size={32} />,
     title: 'Cari Acara',
-    desc: 'Temukan berbagai acara menarik dari berbagai kategori sesuai minat Anda.',
+    desc: 'Temukan berbagai acara menarik dari berbagai kategori sesuai minat Anda.'
   },
   {
-    icon: 'ticket',
+    icon: <TicketIcon size={32} />,
     title: 'Pesan Tiket',
-    desc: 'Pilih tiket dan lakukan pembayaran dengan cepat dan aman menggunakan berbagai metode.',
+    desc: 'Pilih tiket dan lakukan pembayaran dengan cepat dan aman menggunakan berbagai metode.'
   },
   {
-    icon: 'user',
+    icon: <UserIcon size={32} />,
     title: 'Nikmati Acara',
-    desc: 'Dapatkan e-tiket secara instan dan siap untuk dinikmati di acara.',
-  },
+    desc: 'Dapatkan e-tiket secara instan dan siap untuk dinikmati di acara.'
+  }
 ];
 
-export const HowItWorks: FC = () => {
+export const HowItWorks = () => {
   return (
     <div className="py-16 bg-blue-600">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -36,7 +36,7 @@ export const HowItWorks: FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {steps.map((step, i) => (
-            <Step key={i} step={step} index={i} />
+            <StepCard key={i} index={i} {...step} />
           ))}
         </div>
       </div>
