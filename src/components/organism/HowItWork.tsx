@@ -1,6 +1,5 @@
-// src/components/organisms/HowItWorks.tsx
 import { FC } from 'react';
-import { Step } from '@/component/molecule/Step';
+import { Step } from '@/components/molecul/Step';
 import { motion } from 'framer-motion';
 
 const steps = [

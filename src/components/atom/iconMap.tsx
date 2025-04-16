@@ -6,12 +6,12 @@ interface IconProps {
   size: number;
 }
 
-const IconMap = {
+export const iconMap = {
   search: <SearchIcon size={32} />,
   ticket: <TicketIcon size={32} />,
   user: <UserIcon size={32} />,
 };
 
 export const Icon: FC<IconProps> = ({ type, size }) => {
-  return IconMap[type] || null;
+  return iconMap[type] || null;
 };
