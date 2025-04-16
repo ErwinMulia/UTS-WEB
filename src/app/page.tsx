@@ -1,12 +1,11 @@
 'use client'
 
-import { useState } from 'react';
 import { Header } from '@/components/common/header';
 import { HeroSection } from '@/components/home/herosection';
 import Categories from '@/components/home/category';
 import FeaturedEvents  from '@/components/home/acara';
 import HowItWorks  from '@/components/home/HowItWorks';
-import { Newsletter } from '@/components/home/cta';
+import {Newsletter}  from '@/components/home/Newsletter';
 import { Footer } from '@/components/common/footer';
 
 export default function Home() {
@@ -17,7 +16,7 @@ export default function Home() {
       <Categories />
       <FeaturedEvents />
       <HowItWorks />
-      <Newsletter />
+      <Newsletter title={''} description={''} />
       <Footer />
     </div>
   );
