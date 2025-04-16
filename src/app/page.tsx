@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Header } from '@/components/common/header';
 import { HeroSection } from '@/components/home/herosection';
 import Categories from '@/components/home/category';
-import { FeaturedEvents } from '@/components/home/acara';
+import FeaturedEvents  from '@/components/home/acara';
 import { HowItWorks } from '@/components/home/carakerja';
 import { Newsletter } from '@/components/home/cta';
 import { Footer } from '@/components/common/footer';
