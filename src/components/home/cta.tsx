@@ -3,7 +3,6 @@ export function Newsletter() {
     <div className="py-12 bg-white text-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-10">
-          {/* Form Newsletter */}
           <div className="lg:w-1/2 text-center lg:text-left">
             <h2 className="text-3xl font-bold mb-2">Tetap Terinformasi</h2>
             <p className="mb-6">Dapatkan info terbaru tentang acara-acara terpopuler langsung ke email Anda</p>
@@ -19,7 +18,6 @@ export function Newsletter() {
             </div>
           </div>
 
-          {/* Section Review */}
           <div className="lg:w-1/2">
             <h3 className="text-xl font-semibold mb-4 text-center lg:text-left">Apa kata mereka?</h3>
             <div className="space-y-6">
