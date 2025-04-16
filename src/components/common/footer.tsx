@@ -1,3 +1,4 @@
+//footer
 import { FaInstagram, FaFacebook, FaYoutube, FaTiktok } from 'react-icons/fa';
 
 export function Footer() {
@@ -88,3 +89,4 @@ export function Footer() {
     </footer>
   );
 }
+

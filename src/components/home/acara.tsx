@@ -1,3 +1,4 @@
+//feature event
 import { CalendarIcon, MapPinIcon, ArrowRightIcon } from 'lucide-react';
 
 export function FeaturedEvents() {

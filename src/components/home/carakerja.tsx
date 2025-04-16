@@ -1,3 +1,4 @@
+//howitsworks
 import { SearchIcon, TicketIcon, UserIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
 
