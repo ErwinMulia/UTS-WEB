@@ -1,3 +1,5 @@
+'use client';
+
 import { EventCard } from "@/components/molecul/EventCard";
 
 const events = [
