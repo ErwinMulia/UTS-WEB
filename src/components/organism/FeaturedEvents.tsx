@@ -37,17 +37,17 @@ export function FeaturedEvents() {
   ];
 
   return (
-    <div className="py-8 bg-gray-50"> {/* Reduced padding */}
+    <div className="py-8 bg-gray-50"> 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center mb-6"> {/* Reduced margin-bottom */}
+        <div className="flex justify-between items-center mb-6"> 
           <h2 className="text-xl font-bold text-gray-800"></h2> 
           <a href="#" className="text-blue-600 flex items-center font-medium hover:underline">
             Lihat Semua <ArrowRightIcon size={16} className="ml-1" />
           </a>
         </div>
 
-        {/* Grid Layout for Featured Events */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"> {/* Reduced gap */}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"> 
           {featuredEvents.map((event) => (
             <div key={event.id} className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col h-full hover:scale-105 transition-transform duration-300 ease-in-out">
               <div className="relative">
@@ -57,12 +57,12 @@ export function FeaturedEvents() {
                   className="w-full h-48 object-cover rounded-t-lg transition-transform duration-300 ease-in-out hover:scale-110"
                 />
               </div>
-              <div className="flex flex-col justify-between p-3 flex-1"> {/* Reduced padding */}
-                <h3 className="text-sm font-semibold text-gray-800">{event.title}</h3> {/* Smaller text size */}
-                <p className="text-xs text-gray-600">{event.date}</p> {/* Smaller text size */}
-                <p className="text-xs text-gray-600">{event.location}</p> {/* Smaller text size */}
-                <div className="flex justify-between items-center mt-3"> {/* Reduced margin-top */}
-                  <p className="text-sm font-bold text-blue-600">{event.price}</p> {/* Slightly smaller text */}
+              <div className="flex flex-col justify-between p-3 flex-1"> 
+                <h3 className="text-sm font-semibold text-gray-800">{event.title}</h3> 
+                <p className="text-xs text-gray-600">{event.date}</p> 
+                <p className="text-xs text-gray-600">{event.location}</p> 
+                <div className="flex justify-between items-center mt-3"> 
+                  <p className="text-sm font-bold text-blue-600">{event.price}</p> 
                   <button className="bg-blue-600 text-white py-2 px-3 rounded-md hover:bg-blue-700 text-xs">
                     Pesan Tiket
                   </button>

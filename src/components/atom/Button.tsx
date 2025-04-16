@@ -4,7 +4,7 @@ import { twMerge } from 'tailwind-merge';
 type ButtonProps = {
   variant?: 'primary' | 'secondary' | 'outline';
   size?: 'sm' | 'md' | 'lg';
-  children: ReactNode; // Tambahkan ini
+  children: ReactNode;
   className?: string;
   onClick?: () => void;
 };

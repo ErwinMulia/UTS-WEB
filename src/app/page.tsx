@@ -32,17 +32,15 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Testimonial Section for Rina and Andi - Display Side by Side */}
       <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-          <div className="flex justify-between gap-8 flex-wrap"> {/* Flexbox layout for side by side */}
-            {/* Testimonial for Rina */}
+          <div className="flex justify-between gap-8 flex-wrap"> 
+
             <div className="flex-1 min-w-[300px]">
 
             </div>
 
-            {/* Testimonial for Andi */}
             <div className="flex-1 min-w-[300px]">
 
             </div>
