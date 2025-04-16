@@ -1,5 +1,5 @@
-import { EventCard } from './components/EventCard';
 import { ArrowRightIcon } from 'lucide-react';
+import { EventCard } from '../molecul/EventCard';
 
 export function FeaturedEvents() {
   const featuredEvents = [

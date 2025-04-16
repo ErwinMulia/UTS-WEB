@@ -1,7 +1,7 @@
-import { Text } from '.Text';
-import { Icon } from './Icon';
-import { Button } from './Button';
-import { Image } from './Components/Image';
+import { Text } from '../atom/Text';
+import { Icon } from '../atom/Icon';
+import { Button } from '../atom/Button';
+import { Image } from '../atom/Image';
 
 interface Event {
   title: string;
