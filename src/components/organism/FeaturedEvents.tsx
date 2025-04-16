@@ -1,5 +1,4 @@
 import { ArrowRightIcon } from 'lucide-react';
-import { EventCard } from '../molecul/EventCard';
 
 export function FeaturedEvents() {
   const featuredEvents = [
@@ -41,7 +40,7 @@ export function FeaturedEvents() {
     <div className="py-8 bg-gray-50"> {/* Reduced padding */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center mb-6"> {/* Reduced margin-bottom */}
-          <h2 className="text-xl font-bold text-gray-800">Acara Populer</h2> {/* Smaller font size */}
+          <h2 className="text-xl font-bold text-gray-800"></h2> 
           <a href="#" className="text-blue-600 flex items-center font-medium hover:underline">
             Lihat Semua <ArrowRightIcon size={16} className="ml-1" />
           </a>

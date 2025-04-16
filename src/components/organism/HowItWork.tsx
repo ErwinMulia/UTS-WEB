@@ -24,8 +24,8 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <div className="py-16 bg-blue-600 px-4 sm:px-10 lg:px-20 w-full"> {/* Full width */}
-      <div className="mx-auto"> {/* Center the content, no max-width */}
+    <div className="py-16 bg-blue-600 px-4 sm:px-10 lg:px-20 w-full">
+      <div className="max-w-7xl mx-auto">
         <motion.h2
           className="text-3xl font-bold mb-12 text-center text-white"
           initial={{ opacity: 0, y: -20 }}
@@ -36,7 +36,7 @@ export function HowItWorks() {
           Cara Kerja
         </motion.h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
           {steps.map((step, i) => (
             <StepCard key={i} index={i} {...step} />
           ))}

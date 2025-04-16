@@ -4,7 +4,7 @@ import CategorySection from "@/components/organism/CategorySection";
 import { HowItWorks } from "@/components/organism/HowItWork";
 import { Newsletter } from "@/components/organism/Newsletter";
 import { Header } from '../components/organism/Header';
-import { Footer } from "@/components/common/footer";
+import { FooterSectionOrganism } from "@/components/organism/FooterSectionOrganism";
 
 export default function Home() {
   return (
@@ -54,7 +54,7 @@ export default function Home() {
         <Newsletter />
       </section>
 
-      <Footer />
+      <FooterSectionOrganism />
     </main>
   );
 }
