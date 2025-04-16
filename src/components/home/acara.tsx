@@ -1,5 +1,5 @@
 import React from 'react';
-import { FeaturedEvents } from './component/FeaturedEvents';
+import { FeaturedEvents } from './components/FeaturedEvents';
 
 function App() {
   return (

@@ -1,8 +1,7 @@
-// components/EventCard.tsx
-import { Text } from './Text';
+import { Text } from '.Text';
 import { Icon } from './Icon';
 import { Button } from './Button';
-import { Image } from './components/Image';
+import { Image } from './Components/Image';
 
 interface Event {
   title: string;
