@@ -6,7 +6,7 @@ import CategoryFilter from "../molecul/CategoryFilter";
 const allEvents = [
   { id: 1, title: "Concert Asian", category: "Music", date: "2025-05-01" },
   { id: 2, title: "Football Match", category: "Sport", date: "2025-05-03" },
-  { id: 3, title: "Stand-up Comedy", category: "Theatre", date: "2025-05-05" },
+  { id: 3, title: "Stand-up Comedy", category: "Theater", date: "2025-05-05" },
   { id: 4, title: "Jazz Night", category: "Music", date: "2025-05-10" },
 ];
 
