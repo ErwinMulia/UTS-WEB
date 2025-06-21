@@ -1,14 +1,44 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Logo from '@/components/atom/Logo'; 
 import NavLinks from '@/components/molecul/NavLinks';
 import SearchBar from '@/components/molecul/SearchBar';
 import AuthButtons from '@/components/molecul/AuthButtons';  
+import CartIcon from '@/components/molecul/CartIcon';
+import { supabase } from '@/lib/supabaseclient';
 
 export function Header() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [cartItemCount, setCartItemCount] = useState(0);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // Periksa status login dan jumlah item di keranjang
+  useEffect(() => {
+    // Periksa status login
+    const checkAuth = async () => {
+      const { data } = await supabase.auth.getSession();
+      setIsLoggedIn(!!data.session);
+      
+      // Jika login, ambil jumlah item di keranjang dari localStorage
+      if (data.session) {
+        const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
+        setCartItemCount(cartItems.length);
+      }
+    };
+    
+    checkAuth();
+    
+    // Tambahkan event listener untuk perubahan pada localStorage
+    const handleStorageChange = () => {
+      const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
+      setCartItemCount(cartItems.length);
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   return (
     <>
@@ -32,6 +62,7 @@ export function Header() {
 
             <div className="flex items-center space-x-4">
               <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+              <CartIcon itemCount={cartItemCount} />
               <AuthButtons />
             </div>
           </div>
