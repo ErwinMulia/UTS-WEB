@@ -10,6 +10,8 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState(false);
   const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -24,7 +26,13 @@ export default function LoginPage() {
         password,
       });
 
-      if (loginError) throw loginError;
+      if (loginError) {
+        // Periksa apakah error terkait email belum diverifikasi
+        if (loginError.message.includes('Email not confirmed')) {
+          throw new Error('Email belum diverifikasi. Silakan periksa email Anda untuk link verifikasi.');
+        }
+        throw loginError;
+      }
       if (!data?.user) throw new Error('Gagal login. User tidak ditemukan.');
 
       // 2) Ambil role user dari tabel users
@@ -58,6 +66,46 @@ export default function LoginPage() {
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
             {error}
+            {error.includes('Email belum diverifikasi') && (
+              <div className="mt-2">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (!email) {
+                      setError('Masukkan email Anda untuk mengirim ulang verifikasi');
+                      return;
+                    }
+                    setResendLoading(true);
+                    try {
+                      const { error } = await supabase.auth.resend({
+                        type: 'signup',
+                        email,
+                        options: {
+                          emailRedirectTo: `${window.location.origin}/login`,
+                        },
+                      });
+                      if (error) throw error;
+                      setResendSuccess(true);
+                      setError('');
+                    } catch (err) {
+                      setError(err instanceof Error ? err.message : 'Gagal mengirim email verifikasi');
+                    } finally {
+                      setResendLoading(false);
+                    }
+                  }}
+                  disabled={resendLoading}
+                  className="mt-2 text-blue-600 hover:text-blue-800 underline"
+                >
+                  {resendLoading ? 'Mengirim...' : 'Kirim ulang email verifikasi'}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+        
+        {resendSuccess && (
+          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+            Email verifikasi telah dikirim ulang. Silakan periksa kotak masuk Anda.
           </div>
         )}
 

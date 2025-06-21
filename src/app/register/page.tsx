@@ -24,6 +24,12 @@ export default function RegisterPage() {
       const { data, error: authError } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/login`,
+          data: {
+            email: email
+          }
+        }
       });
 
       if (authError) throw authError;
@@ -43,7 +49,9 @@ export default function RegisterPage() {
 
       if (dbError) throw dbError;
 
-      router.push('/login');
+      // Tampilkan pesan sukses dengan instruksi verifikasi email
+      setError('Pendaftaran berhasil! Silakan periksa email Anda untuk verifikasi akun sebelum login.');
+      // Tidak redirect ke login, biarkan user membaca pesan
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Terjadi kesalahan saat mendaftar.');
     } finally {

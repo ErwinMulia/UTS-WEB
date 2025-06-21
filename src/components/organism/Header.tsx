@@ -21,14 +21,17 @@ export function Header() {
       const { data } = await supabase.auth.getSession();
       setIsLoggedIn(!!data.session);
       
-      // Jika login, ambil jumlah item di keranjang dari localStorage
-      if (data.session) {
-        const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
-        setCartItemCount(cartItems.length);
-      }
+      // Ambil jumlah item di keranjang dari localStorage (baik login atau tidak)
+      const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
+      setCartItemCount(cartItems.length);
     };
     
     checkAuth();
+    
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsLoggedIn(!!session);
+    });
     
     // Tambahkan event listener untuk perubahan pada localStorage
     const handleStorageChange = () => {
@@ -37,7 +40,10 @@ export function Header() {
     };
     
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      subscription.unsubscribe();
+    };
   }, []);
 
   return (
