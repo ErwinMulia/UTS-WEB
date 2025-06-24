@@ -193,7 +193,7 @@ export const CartOrganism = () => {
           <CartTable 
             items={cartItems}
             onIncrease={increaseQuantity}
-            onDecrease={decreaseQuantity}
+            onDecrease={decreaseQuantity} 
             onRemove={removeItem}
           />
           

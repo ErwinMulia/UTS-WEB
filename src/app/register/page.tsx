@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabaseclient';
 
@@ -10,7 +9,6 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,6 +31,7 @@ export default function RegisterPage() {
     }
 
     try {
+
       const { data, error: authError } = await supabase.auth.signUp({
         email,
         password,
@@ -40,10 +39,29 @@ export default function RegisterPage() {
           emailRedirectTo: `${window.location.origin}/login`,
           data: { email }
         }
-      });
+      })
 
+      console.log(data?.user?.id);
+
+      // Insert data into the users table
+        const { error: insertError } = await supabase
+        .from('users')
+        .insert([
+          {
+            id: data?.user?.uuid,
+            nama_lengkap: `ken${Math.floor(Math.random() * 1000)}`,
+            alamat: `jalan renon`,
+            role: `user`
+          }
+        ]);
+
+      if (insertError) {
+        console.error('Insert error:', insertError);
+        throw insertError;
+      }
+      
       console.log('Supabase response:', data);
-
+      
       if (authError) {
         console.error('Auth error:', authError);
         throw authError;

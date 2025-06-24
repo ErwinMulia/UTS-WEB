@@ -90,6 +90,8 @@ export default function LoginPage() {
       } else {
         router.replace('/');
       }
+
+      
     } catch (err) {
       console.error('Login process error:', err);
       setError(err instanceof Error ? err.message : 'Terjadi kesalahan saat login.');
