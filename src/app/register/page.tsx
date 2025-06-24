@@ -1,4 +1,3 @@
-// app/register/page.tsx
 'use client';
 
 import { useState } from 'react';
@@ -13,52 +12,56 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  /* ---------- handleRegister ---------- */
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
+    console.log('Submitted Email:', email);
+    console.log('Submitted Password:', password);
+
+    if (!email || !password) {
+      setError('Email dan password wajib diisi');
+      setLoading(false);
+      return;
+    }
+
+    if (password.length < 6) {
+      setError('Password harus minimal 6 karakter');
+      setLoading(false);
+      return;
+    }
+
     try {
-      // 1) Registrasi ke Supabase Auth
       const { data, error: authError } = await supabase.auth.signUp({
         email,
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/login`,
-          data: {
-            email: email
-          }
+          data: { email }
         }
       });
 
-      if (authError) throw authError;
-      if (!data?.user) throw new Error('Pendaftaran gagal. Data user tidak tersedia.');
+      console.log('Supabase response:', data);
 
-      // 2) Tambahkan ke tabel users (jangan simpan password)
-      const { error: dbError } = await supabase
-        .from('users')
-        .insert([
-          {
-            id: data.user.id,
-            email,
-            created_at: new Date().toISOString(),
-            role: 'user',
-          },
-        ]);
+      if (authError) {
+        console.error('Auth error:', authError);
+        throw authError;
+      }
 
-      if (dbError) throw dbError;
+      if (!data?.user) {
+        console.error('No user returned');
+        throw new Error('Pendaftaran gagal. Data user tidak tersedia.');
+      }
 
-      // Tampilkan pesan sukses dengan instruksi verifikasi email
-      setError('Pendaftaran berhasil! Silakan periksa email Anda untuk verifikasi akun sebelum login.');
-      // Tidak redirect ke login, biarkan user membaca pesan
+      setError('Pendaftaran berhasil! Silakan periksa email untuk verifikasi.');
     } catch (err) {
+      console.error('Registration error:', err);
       setError(err instanceof Error ? err.message : 'Terjadi kesalahan saat mendaftar.');
     } finally {
       setLoading(false);
     }
   };
-  /* ---------- /handleRegister ---------- */
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -72,7 +75,6 @@ export default function RegisterPage() {
         )}
 
         <form className="mt-8 space-y-6" onSubmit={handleRegister}>
-          {/* Email */}
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
               Email
@@ -82,12 +84,14 @@ export default function RegisterPage() {
               type="email"
               required
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                console.log('Input Email:', e.target.value);
+                setEmail(e.target.value);
+              }}
               className="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 
-          {/* Password */}
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700">
               Password
@@ -97,12 +101,14 @@ export default function RegisterPage() {
               type="password"
               required
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                console.log('Input Password:', e.target.value);
+                setPassword(e.target.value);
+              }}
               className="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 
-          {/* Submit */}
           <button
             type="submit"
             disabled={loading}

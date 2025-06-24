@@ -20,6 +20,8 @@ export default function LoginPage() {
     setError('');
 
     try {
+      console.log('Attempting login for:', email);
+      
       // 1) Login ke Supabase Auth
       const { data, error: loginError } = await supabase.auth.signInWithPassword({
         email,
@@ -27,13 +29,20 @@ export default function LoginPage() {
       });
 
       if (loginError) {
+        console.error('Login error:', loginError);
         // Periksa apakah error terkait email belum diverifikasi
         if (loginError.message.includes('Email not confirmed')) {
           throw new Error('Email belum diverifikasi. Silakan periksa email Anda untuk link verifikasi.');
         }
         throw loginError;
       }
-      if (!data?.user) throw new Error('Gagal login. User tidak ditemukan.');
+      
+      if (!data?.user) {
+        console.error('No user data returned from login');
+        throw new Error('Gagal login. User tidak ditemukan.');
+      }
+      
+      console.log('User logged in successfully with ID:', data.user.id);
 
       // 2) Ambil role user dari tabel users
       const { data: userData, error: userError } = await supabase
@@ -42,9 +51,39 @@ export default function LoginPage() {
         .eq('id', data.user.id)
         .single();
 
-      if (userError) throw userError;
-      if (!userData) throw new Error('User tidak ditemukan di database.');
+      if (userError) {
+        console.error('Error fetching user data:', userError);
+        throw userError;
+      }
+      
+      if (!userData) {
+        console.error('User not found in database');
+        
+        // Jika user ada di auth tetapi tidak ada di tabel users, coba buat entri baru
+        console.log('Attempting to create user record in database');
+        const { error: insertError } = await supabase
+          .from('users')
+          .insert([
+            {
+              id: data.user.id,
+              email,
+              created_at: new Date().toISOString(),
+              role: 'user',
+            },
+          ]);
+          
+        if (insertError) {
+          console.error('Error creating user record:', insertError);
+          throw new Error('User tidak ditemukan di database dan gagal membuat record baru.');
+        }
+        
+        console.log('Created new user record in database');
+        router.replace('/');
+        return;
+      }
 
+      console.log('User role:', userData.role);
+      
       // 3) Redirect berdasarkan role
       if (userData.role === 'admin') {
         router.replace('/admin');
@@ -52,6 +91,7 @@ export default function LoginPage() {
         router.replace('/');
       }
     } catch (err) {
+      console.error('Login process error:', err);
       setError(err instanceof Error ? err.message : 'Terjadi kesalahan saat login.');
     } finally {
       setLoading(false);
