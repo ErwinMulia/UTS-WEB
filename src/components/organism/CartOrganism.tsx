@@ -9,7 +9,7 @@ import { CartTable } from '../molecul/CartTable';
 import { CartSummary } from '../molecul/CartSummary';
 
 interface CartItem {
-  id: number;
+  id: string; 
   title: string;
   date: string;
   location: string;
@@ -20,72 +20,53 @@ interface CartItem {
 
 export const CartOrganism = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [notification, setNotification] = useState<{type: 'success' | 'error', message: string} | null>(null);
+  const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    // Periksa status login
-    const checkAuth = async () => {
-      const { data } = await supabase.auth.getSession();
-      setIsLoggedIn(!!data.session);
-      
-      // Ambil data keranjang dari localStorage
-      const storedItems = localStorage.getItem('cartItems');
-      if (storedItems) {
-        setCartItems(JSON.parse(storedItems));
-      }
-    };
-    
-    checkAuth();
+    const storedItems = localStorage.getItem('cartItems');
+    if (storedItems) {
+      const parsed = JSON.parse(storedItems);
+      const fixedItems: CartItem[] = parsed.map((item: any) => ({
+        ...item,
+        id: String(item.id),
+      }));
+      setCartItems(fixedItems);
+    }
   }, []);
 
-  // Fungsi untuk menambah jumlah tiket
-  const increaseQuantity = (id: number) => {
-    const updatedItems = cartItems.map(item => 
+  const increaseQuantity = (id: string) => {
+    const updatedItems = cartItems.map(item =>
       item.id === id ? { ...item, quantity: item.quantity + 1 } : item
     );
     setCartItems(updatedItems);
     localStorage.setItem('cartItems', JSON.stringify(updatedItems));
-    // Trigger storage event untuk update CartIcon
     window.dispatchEvent(new Event('storage'));
   };
 
-  // Fungsi untuk mengurangi jumlah tiket
-  const decreaseQuantity = (id: number) => {
-    const updatedItems = cartItems.map(item => 
+  const decreaseQuantity = (id: string) => {
+    const updatedItems = cartItems.map(item =>
       item.id === id && item.quantity > 1 ? { ...item, quantity: item.quantity - 1 } : item
     );
     setCartItems(updatedItems);
     localStorage.setItem('cartItems', JSON.stringify(updatedItems));
-    // Trigger storage event untuk update CartIcon
     window.dispatchEvent(new Event('storage'));
   };
 
-  // Fungsi untuk menghapus item dari keranjang
-  const removeItem = (id: number) => {
+  const removeItem = (id: string) => {
     const updatedItems = cartItems.filter(item => item.id !== id);
     setCartItems(updatedItems);
     localStorage.setItem('cartItems', JSON.stringify(updatedItems));
-    // Trigger storage event untuk update CartIcon
     window.dispatchEvent(new Event('storage'));
   };
 
-  // Fungsi untuk menampilkan notifikasi
   const showNotification = (type: 'success' | 'error', message: string) => {
     setNotification({ type, message });
-    // Otomatis hilangkan notifikasi setelah 5 detik
     setTimeout(() => setNotification(null), 5000);
   };
 
-  // Fungsi untuk checkout
   const handleCheckout = async () => {
-    if (!isLoggedIn) {
-      router.push('/login');
-      return;
-    }
-
     if (cartItems.length === 0) {
       showNotification('error', 'Keranjang belanja kosong');
       return;
@@ -94,110 +75,104 @@ export const CartOrganism = () => {
     setIsProcessing(true);
 
     try {
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-
-      if (userError || !user) {
-        throw new Error('Gagal mendapatkan data pengguna. Silakan login kembali.');
+      const userEmail = localStorage.getItem('user_email');
+      if (!userEmail) {
+        throw new Error('Email pengguna tidak ditemukan. Silakan login manual atau inputkan email.');
       }
 
-      // Hitung total harga
       const totalPrice = cartItems.reduce((total, item) => {
         const priceValue = parseInt(item.price.replace(/[^0-9]/g, ''));
-        return total + (priceValue * item.quantity);
+        return total + priceValue * item.quantity;
       }, 0);
 
-      // Buat order baru
       const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert([{
-          user_id: user.id,
+          user_email: userEmail,
           total_price: totalPrice,
           status: 'pending',
           order_date: new Date().toISOString()
         }])
         .select();
 
-      if (orderError !== null) {
-        console.error('Order creation error:', orderError);
+      if (orderError) {
         throw new Error('Gagal membuat pesanan: ' + orderError.message);
       }
 
-      if (!order || order.length === 0) {
-        throw new Error('Data pesanan tidak tersedia setelah pembuatan.');
+      const orderId = order?.[0]?.id;
+      if (!orderId) {
+        throw new Error('Order ID tidak ditemukan setelah insert order');
       }
 
-      const orderId = Number(order[0].id);
-
-      // Siapkan item pesanan
       const orderItems = cartItems.map(item => ({
         order_id: orderId,
-        event_id: String(item.id),
+        event_id: item.id,
         quantity: item.quantity,
-        price: parseInt(item.price.replace(/[^0-9]/g, ''))
+        price: parseInt(item.price.replace(/[^0-9]/g, '')),
       }));
 
-      const { error: itemsError } = await supabase
-        .from('order_items')
-        .insert(orderItems);
+      console.log('Data order items akan diinsert:', orderItems);
 
-      if (itemsError !== null) {
-        console.error('Insert order_items error:', itemsError);
-        throw new Error('Gagal menambahkan item pesanan: ' + itemsError.message);
+      const { data: itemsData, error: itemsError } = await supabase
+        .from('order_items')
+        .insert(orderItems)
+        .select();
+
+      console.log('Hasil insert order items:', itemsData);
+      console.log('Error insert order items:', itemsError);
+
+      if (itemsError) {
+        throw new Error('Gagal menambahkan item pesanan: ' + (itemsError.message || JSON.stringify(itemsError)));
       }
 
-      // Kosongkan keranjang & update UI
       localStorage.removeItem('cartItems');
       setCartItems([]);
       window.dispatchEvent(new Event('storage'));
 
-      // Tampilkan notifikasi sukses
       showNotification('success', 'Checkout berhasil! Mengalihkan ke halaman sukses...');
 
-      // Alihkan ke halaman sukses setelah delay
       setTimeout(() => {
         router.push('/order-success');
       }, 1500);
 
-      return; // ❗ Penting agar tidak lanjut ke catch
     } catch (error) {
       console.error('Error during checkout:', error);
       showNotification('error', error instanceof Error ? error.message : 'Terjadi kesalahan saat checkout.');
     } finally {
       setIsProcessing(false);
     }
-  }; 
+  };
 
-  // Hitung total harga
   const calculateTotal = () => {
     return cartItems.reduce((total, item) => {
       const priceValue = parseInt(item.price.replace(/[^0-9]/g, ''));
-      return total + (priceValue * item.quantity);
+      return total + priceValue * item.quantity;
     }, 0);
   };
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
       {notification && (
-        <Notification 
-          type={notification.type} 
-          message={notification.message} 
-          onClose={() => setNotification(null)} 
+        <Notification
+          type={notification.type}
+          message={notification.message}
+          onClose={() => setNotification(null)}
         />
       )}
       <h1 className="text-2xl font-bold text-gray-800 mb-6">Keranjang Tiket</h1>
-      
+
       {cartItems.length === 0 ? (
         <EmptyCart onExplore={() => router.push('/')} />
       ) : (
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <CartTable 
+          <CartTable
             items={cartItems}
             onIncrease={increaseQuantity}
-            onDecrease={decreaseQuantity} 
+            onDecrease={decreaseQuantity}
             onRemove={removeItem}
           />
-          
-          <CartSummary 
+
+          <CartSummary
             total={calculateTotal()}
             onCheckout={handleCheckout}
             isProcessing={isProcessing}

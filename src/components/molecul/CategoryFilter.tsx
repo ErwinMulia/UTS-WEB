@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import CategoryButton from "@/components/atom/categorybutton";
+import CategoryButton from "@/components/atom/Categorybutton";
 const categories = ["All", "Music", "Sport", "Theatre"];
 
 type CategoryFilterProps = {

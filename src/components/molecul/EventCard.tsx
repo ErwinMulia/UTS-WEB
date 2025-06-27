@@ -1,7 +1,7 @@
 'use client';
 
 import { Text } from '../atom/Text';
-import { Icon } from '../atom/icon';
+import { Icon } from '../atom/Icon';
 import { Button } from '../atom/Button';
 import { Image } from '../atom/Image';
 import { useState } from 'react';
