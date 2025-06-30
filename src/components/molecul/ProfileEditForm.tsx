@@ -24,9 +24,21 @@ export const ProfileEditForm = ({
   isLoading
 }: ProfileEditFormProps) => {
   const [formData, setFormData] = useState<ProfileFormData>(initialData);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    
+    // Validasi nomor telepon saat input
+    if (name === 'phone') {
+      const phoneRegex = /^[0-9+\-\s]*$/;
+      if (value && !phoneRegex.test(value)) {
+        setPhoneError('Format nomor telepon tidak valid');
+      } else {
+        setPhoneError(null);
+      }
+    }
+    
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -35,6 +47,12 @@ export const ProfileEditForm = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validasi sebelum submit
+    if (phoneError) {
+      return;
+    }
+    
     await onSubmit(formData);
   };
 
@@ -73,6 +91,8 @@ export const ProfileEditForm = ({
         label="Nomor Telepon"
         icon={<FaPhone />}
         placeholder="Masukkan nomor telepon"
+        pattern="[0-9+\-\s]*"
+        helpText={phoneError || 'Contoh: +62812-3456-7890'}
       />
       
       <div className="flex justify-end space-x-2 pt-4">
@@ -87,7 +107,7 @@ export const ProfileEditForm = ({
         <ProfileButton
           type="submit"
           variant="primary"
-          disabled={isLoading}
+          disabled={isLoading || !!phoneError}
           isLoading={isLoading}
           loadingText="Menyimpan..."
           icon={<FaSave />}

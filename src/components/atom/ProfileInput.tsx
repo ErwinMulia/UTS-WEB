@@ -15,6 +15,7 @@ interface ProfileInputProps {
   className?: string;
   label?: string;
   helpText?: string;
+  pattern?: string;
 }
 
 export const ProfileInput = ({
@@ -31,6 +32,7 @@ export const ProfileInput = ({
   className = '',
   label,
   helpText,
+  pattern,
 }: ProfileInputProps) => {
   const baseInputClasses = 'flex-grow outline-none bg-transparent';
   const baseContainerClasses = 'flex items-center border rounded-md px-3 py-2';
@@ -62,6 +64,7 @@ export const ProfileInput = ({
           disabled={disabled}
           readOnly={readOnly}
           className={baseInputClasses}
+          pattern={pattern}
         />
       </div>
       {helpText && <p className="text-xs text-gray-500">{helpText}</p>}

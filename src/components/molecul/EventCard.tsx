@@ -7,7 +7,7 @@ import { Image } from '../atom/Image';
 import { useState } from 'react';
 
 interface Event {
-  id: number;
+  id: string | number;
   title: string;
   date: string;
   location: string;

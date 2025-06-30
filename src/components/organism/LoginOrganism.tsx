@@ -12,29 +12,34 @@ export const LoginOrganism = () => {
   const [success, setSuccess] = useState(false);
   const router = useRouter();
 
-  const handleLogin = async (email: string, password: string) => {
+  const handleLogin = async (username: string, password: string) => {
     setLoading(true);
     setError('');
     setSuccess(false);
 
-    if (!email || !password) {
-      setError('Email dan password wajib diisi');
+    if (!username || !password) {
+      setError('Username dan password wajib diisi');
       setLoading(false);
       return;
     }
 
     try {
-      const { data, error: loginError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      // Cari user berdasarkan username dan password
+      const { data, error: queryError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('username', username)
+        .eq('password', password)
+        .single();
 
-      if (loginError) {
-        console.error('Login error:', loginError);
-        setError('Email atau password salah');
+      if (queryError || !data) {
+        console.error('Login error:', queryError);
+        setError('Username atau password salah');
       } else {
         setSuccess(true);
-        localStorage.setItem('user_email', email); // simpan email user bila perlu
+        localStorage.setItem('user_username', username); // simpan username user
+        localStorage.setItem('user_id', data.id); // simpan id user
+        localStorage.setItem('user_role', data.role); // simpan role user
         setTimeout(() => {
           router.push('/'); // arahkan ke halaman utama atau dashboard
         }, 1000);
@@ -59,11 +64,7 @@ export const LoginOrganism = () => {
           success={success}
         />
 
-        <AuthLink
-          text="Belum punya akun?"
-          linkText="Daftar di sini"
-          href="/register"
-        />
+
       </div>
     </div>
   );

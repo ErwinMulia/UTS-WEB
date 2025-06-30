@@ -31,12 +31,14 @@ export const ProfileOrganism = () => {
   });
 
   useEffect(() => {
-    const checkUser = async () => {
+    const checkUser = () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-          setCurrentUser(session.user);
-          await fetchUserProfile(session.user.id);
+        const userId = localStorage.getItem('user_id');
+        const username = localStorage.getItem('user_username');
+        
+        if (userId && username) {
+          setCurrentUser({ id: userId, username: username });
+          fetchUserProfile(userId);
         } else {
           setLoading(false);
           setError('Silakan login untuk melihat profil');
@@ -100,15 +102,15 @@ export const ProfileOrganism = () => {
 
   const createProfileFromAuth = async (userId: string) => {
     try {
-      // Ambil data auth user
-      const { data: authUser } = await supabase.auth.getUser();
+      // Ambil data dari localStorage
+      const username = localStorage.getItem('user_username');
       
-      if (!authUser?.user) throw new Error('Tidak dapat mengambil data pengguna');
+      if (!username) throw new Error('Tidak dapat mengambil data pengguna');
       
       const userData = {
         id: userId,
-        email: authUser.user.email,
-        full_name: authUser.user.user_metadata?.full_name || null,
+        email: username, // Menggunakan username sebagai email
+        full_name: null,
         phone: null,
         created_at: new Date().toISOString()
       };
@@ -138,25 +140,46 @@ export const ProfileOrganism = () => {
     setError(null);
     
     try {
+      // Validasi nomor telepon
+      const phoneRegex = /^[0-9+\-\s]+$/;
+      if (data.phone && !phoneRegex.test(data.phone)) {
+        throw new Error('Format nomor telepon tidak valid');
+      }
+      
       const updateData = {
         full_name: data.full_name,
         phone: data.phone,
         updated_at: new Date().toISOString()
       };
       
+      console.log('Mencoba update profil dengan data:', updateData);
+      
       // Coba update di tabel users
-      let { error } = await supabase
+      let { error, data: updatedData } = await supabase
         .from('users')
         .update(updateData)
-        .eq('id', currentUser.id);
+        .eq('id', currentUser.id)
+        .select();
       
       // Jika gagal, coba di tabel profiles
-      if (error && error.code === 'PGRST106') {
+      if (error) {
+        console.log('Error updating users table:', error);
         const profileResult = await supabase
           .from('profiles')
           .update(updateData)
-          .eq('id', currentUser.id);
+          .eq('id', currentUser.id)
+          .select();
+        
+        updatedData = profileResult.data;
         error = profileResult.error;
+        
+        if (error) {
+          console.log('Error updating profiles table:', error);
+        } else {
+          console.log('Berhasil update di tabel profiles:', updatedData);
+        }
+      } else {
+        console.log('Berhasil update di tabel users:', updatedData);
       }
       
       if (error) {

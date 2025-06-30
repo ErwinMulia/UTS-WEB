@@ -7,7 +7,6 @@ import NavLinks from '@/components/molecul/NavLinks';
 import SearchBar from '@/components/molecul/SearchBar';
 import AuthButtons from '@/components/molecul/AuthButtons';  
 import CartIcon from '@/components/molecul/CartIcon';
-import { supabase } from '@/lib/supabaseclient';
 
 export function Header() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -16,33 +15,33 @@ export function Header() {
 
   // Periksa status login dan jumlah item di keranjang
   useEffect(() => {
-    // Periksa status login
-    const checkAuth = async () => {
-      const { data } = await supabase.auth.getSession();
-      setIsLoggedIn(!!data.session);
+    // Periksa status login dan jumlah item di keranjang
+    const checkAuthAndCart = () => {
+      // Periksa status login berdasarkan user_id di localStorage
+      const userId = localStorage.getItem('user_id');
+      setIsLoggedIn(!!userId);
       
-      // Ambil jumlah item di keranjang dari localStorage (baik login atau tidak)
+      // Ambil jumlah item di keranjang dari localStorage
       const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
       setCartItemCount(cartItems.length);
     };
     
-    checkAuth();
-    
-    // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setIsLoggedIn(!!session);
-    });
+    // Periksa saat komponen dimuat
+    checkAuthAndCart();
     
     // Tambahkan event listener untuk perubahan pada localStorage
     const handleStorageChange = () => {
-      const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
-      setCartItemCount(cartItems.length);
+      checkAuthAndCart();
     };
     
     window.addEventListener('storage', handleStorageChange);
+    
+    // Periksa setiap 2 detik (untuk menangani perubahan yang tidak memicu event storage)
+    const interval = setInterval(checkAuthAndCart, 2000);
+    
     return () => {
       window.removeEventListener('storage', handleStorageChange);
-      subscription.unsubscribe();
+      clearInterval(interval);
     };
   }, []);
 

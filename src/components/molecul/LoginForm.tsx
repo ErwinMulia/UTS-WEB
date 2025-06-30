@@ -3,19 +3,19 @@
 import React, { useState } from 'react';
 
 interface LoginFormProps {
-  onSubmit: (email: string, password: string) => Promise<void>;
+  onSubmit: (username: string, password: string) => Promise<void>;
   error: string;
   success: boolean;
   loading: boolean;
 }
 
 export const LoginForm = ({ onSubmit, error, success, loading }: LoginFormProps) => {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    await onSubmit(email, password);
+    await onSubmit(username, password);
   };
 
   return (
@@ -24,12 +24,12 @@ export const LoginForm = ({ onSubmit, error, success, loading }: LoginFormProps)
       {success && <p className="text-green-500 text-sm">Login berhasil! Mengalihkan...</p>}
 
       <div>
-        <label className="block text-sm font-medium text-gray-700">Email</label>
+        <label className="block text-sm font-medium text-gray-700">Username</label>
         <input
-          name="email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          name="username"
+          type="text"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
           required
           className="w-full border border-gray-300 rounded px-3 py-2"
         />

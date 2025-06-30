@@ -9,7 +9,7 @@ import { CartTable } from '../molecul/CartTable';
 import { CartSummary } from '../molecul/CartSummary';
 
 interface CartItem {
-  id: string; 
+  id: string;
   title: string;
   date: string;
   location: string;
@@ -22,8 +22,24 @@ export const CartOrganism = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [user, setUser] = useState<any>(null);
   const router = useRouter();
 
+  // Ambil sesi pengguna saat awal mount
+  useEffect(() => {
+    const getSession = async () => {
+      const { data, error } = await supabase.auth.getSession();
+      if (error) {
+        console.error('Gagal mendapatkan sesi:', error.message);
+      } else {
+        setUser(data.session?.user || null);
+      }
+    };
+
+    getSession();
+  }, []);
+
+  // Ambil data keranjang dari localStorage
   useEffect(() => {
     const storedItems = localStorage.getItem('cartItems');
     if (storedItems) {
@@ -67,6 +83,11 @@ export const CartOrganism = () => {
   };
 
   const handleCheckout = async () => {
+    if (!user) {
+      showNotification('error', 'Pengguna tidak terautentikasi. Silakan login terlebih dahulu.');
+      return;
+    }
+
     if (cartItems.length === 0) {
       showNotification('error', 'Keranjang belanja kosong');
       return;
@@ -75,10 +96,8 @@ export const CartOrganism = () => {
     setIsProcessing(true);
 
     try {
-      const userEmail = localStorage.getItem('user_email');
-      if (!userEmail) {
-        throw new Error('Email pengguna tidak ditemukan. Silakan login manual atau inputkan email.');
-      }
+      const userId = user.id;
+      const userEmail = user.email || localStorage.getItem('user_email') || '';
 
       const totalPrice = cartItems.reduce((total, item) => {
         const priceValue = parseInt(item.price.replace(/[^0-9]/g, ''));
@@ -88,52 +107,39 @@ export const CartOrganism = () => {
       const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert([{
+          user_id: userId,
           user_email: userEmail,
           total_price: totalPrice,
-          status: 'pending',
-          order_date: new Date().toISOString()
+          status: 'pending'
         }])
         .select();
 
-      if (orderError) {
-        throw new Error('Gagal membuat pesanan: ' + orderError.message);
-      }
+      if (orderError) throw new Error('Gagal membuat pesanan: ' + orderError.message);
 
-      const orderId = order?.[0]?.id;
-      if (!orderId) {
-        throw new Error('Order ID tidak ditemukan setelah insert order');
-      }
+      const orderId = order[0].id;
 
-      const orderItems = cartItems.map(item => ({
+      const orderItemsData = cartItems.map(item => ({
         order_id: orderId,
-        event_id: item.id,
-        quantity: item.quantity,
+        title: item.title,
+        date: item.date,
+        location: item.location,
         price: parseInt(item.price.replace(/[^0-9]/g, '')),
+        image: item.image,
+        quantity: item.quantity
       }));
 
-      console.log('Data order items akan diinsert:', orderItems);
-
-      const { data: itemsData, error: itemsError } = await supabase
+      const { error: itemsError } = await supabase
         .from('order_items')
-        .insert(orderItems)
-        .select();
+        .insert(orderItemsData);
 
-      console.log('Hasil insert order items:', itemsData);
-      console.log('Error insert order items:', itemsError);
+      if (itemsError) throw new Error('Gagal menyimpan item pesanan: ' + itemsError.message);
 
-      if (itemsError) {
-        throw new Error('Gagal menambahkan item pesanan: ' + (itemsError.message || JSON.stringify(itemsError)));
-      }
-
-      localStorage.removeItem('cartItems');
       setCartItems([]);
+      localStorage.removeItem('cartItems');
       window.dispatchEvent(new Event('storage'));
 
-      showNotification('success', 'Checkout berhasil! Mengalihkan ke halaman sukses...');
-
-      setTimeout(() => {
-        router.push('/order-success');
-      }, 1500);
+      showNotification('success', 'Pesanan berhasil dibuat!');
+      setTimeout(() => router.push('/orders'), 2000);
 
     } catch (error) {
       console.error('Error during checkout:', error);

@@ -1,113 +1,152 @@
-// src/components/molecule/OrderListMolecule.tsx
-import React from 'react';
-import Image from 'next/image';
-import { FaTicketAlt, FaMapMarkerAlt, FaCalendarAlt } from 'react-icons/fa';
-import { Order } from '@/components/organism/OrdersOrganism';
+'use client';
 
-interface Props {
-  orders: Order[];
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import { supabase } from '@/lib/supabaseclient';
+import { Header } from '@/components/organism/Header';
+import { FooterSectionOrganism } from '@/components/organism/FooterSectionOrganism';
+import { FaTicketAlt, FaMapMarkerAlt, FaCalendarAlt } from 'react-icons/fa';
+
+interface EventData {
+  title: string;
+  date: string;
+  location: string;
+  image_url: string;
 }
 
-export const OrderListMolecule = ({ orders }: Props) => {
-  const formatPrice = (price: number) =>
-    new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(price);
+interface OrderItem {
+  id: string;
+  quantity: number;
+  price: number;
+  events?: EventData | null;
+}
 
-  const formatDate = (dateString: string) => {
-    if (!dateString) return '-';
+interface Order {
+  id: string;
+  user_email: string;
+  created_at: string;
+  status: string;
+  total_price: number;
+  payment_method: string;
+  order_items?: OrderItem[];
+}
+
+export default function OrdersPage() {
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const router = useRouter();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) {
+        router.replace('/login');
+        return;
+      }
+      const userEmail = data.session.user.email || '';
+      fetchOrders(userEmail);
+    };
+    checkAuth();
+  }, [router]);
+
+  const fetchOrders = async (userEmail: string) => {
     try {
-      return new Date(dateString).toLocaleDateString('id-ID', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-      });
-    } catch {
-      return dateString;
+      setLoading(true);
+      setError('');
+
+      const { data: ordersData, error } = await supabase
+        .from('orders')
+        .select(`
+          *,
+          order_items (
+            id,
+            quantity,
+            price,
+            events (
+              title,
+              date,
+              location,
+              image_url
+            )
+          )
+        `)
+        .eq('user_email', userEmail)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setOrders(ordersData as Order[]);
+    } catch (err: any) {
+      setError(`Gagal mengambil data pesanan: ${err.message || 'Terjadi kesalahan'}`);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const getStatusLabel = (status: string) => {
-    const statusMap: Record<string, { label: string; color: string }> = {
-      pending: { label: 'Menunggu Pembayaran', color: 'bg-yellow-100 text-yellow-800' },
-      paid: { label: 'Pembayaran Berhasil', color: 'bg-green-100 text-green-800' },
-      cancelled: { label: 'Dibatalkan', color: 'bg-red-100 text-red-800' },
-      completed: { label: 'Selesai', color: 'bg-blue-100 text-blue-800' },
-    };
-    return statusMap[status] || { label: status, color: 'bg-gray-100 text-gray-800' };
-  };
-
   return (
-    <div className="space-y-6">
-      {orders.map(order => (
-        <div key={order.id} className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="p-4 border-b flex justify-between items-center">
-            <div>
-              <p className="text-sm text-gray-500">ID Pesanan: {order.id}</p>
-              <p className="text-sm text-gray-500">{formatDate(order.created_at)}</p>
-            </div>
-            <div className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusLabel(order.status).color}`}>
-              {getStatusLabel(order.status).label}
-            </div>
-          </div>
+    <div className="min-h-screen flex flex-col bg-gray-50">
+      <Header />
 
-          <div className="divide-y divide-gray-200">
-            {order.items && order.items.length > 0 ? (
-              order.items.map(item => (
-                <div key={item.id} className="p-4 flex flex-col md:flex-row">
-                  <div className="md:w-1/4 mb-4 md:mb-0 relative h-32 rounded-md overflow-hidden">
-                    {item.event?.image_url ? (
-                      <Image
-                        src={item.event.image_url}
-                        alt={item.event.title || 'Event Image'}
-                        fill
-                        style={{ objectFit: 'cover' }}
-                      />
-                    ) : (
-                      <div className="h-full w-full bg-gray-200 flex items-center justify-center">
-                        <FaTicketAlt className="text-gray-400" size={32} />
-                      </div>
-                    )}
-                  </div>
+      <main className="flex-1 container mx-auto px-4 py-6">
+        {loading ? (
+          <p className="text-gray-600 text-center">Memuat pesanan...</p>
+        ) : error ? (
+          <p className="text-red-600 text-center">{error}</p>
+        ) : orders.length === 0 ? (
+          <p className="text-gray-500 text-center">Belum ada pesanan.</p>
+        ) : (
+          orders.map((order) => (
+            <div key={order.id} className="mb-6 p-4 bg-white shadow rounded-md">
+              <div className="mb-2 flex justify-between items-center">
+                <p className="text-sm text-gray-600">ID Pesanan: {order.id}</p>
+                <p className="text-sm text-gray-600">
+                  {new Date(order.created_at).toLocaleDateString('id-ID')}
+                </p>
+              </div>
+              <p className="font-medium text-blue-600">
+                Total: Rp{order.total_price.toLocaleString('id-ID')}
+              </p>
+              <p className="text-sm text-gray-500">Status: {order.status}</p>
 
-                  <div className="md:w-3/4 md:pl-4">
-                    <h3 className="font-medium text-lg">{item.event?.title || 'Event tidak tersedia'}</h3>
-                    <div className="mt-2 space-y-1 text-sm text-gray-600">
-                      <div className="flex items-center">
-                        <FaCalendarAlt className="mr-2 text-gray-400" />
-                        <span>{item.event?.date ? formatDate(item.event.date) : '-'}</span>
-                      </div>
-                      <div className="flex items-center">
-                        <FaMapMarkerAlt className="mr-2 text-gray-400" />
-                        <span>{item.event?.location || '-'}</span>
-                      </div>
+              <div className="mt-3 border-t pt-3">
+                {(order.order_items ?? []).map((item) => (
+                  <div key={item.id} className="flex gap-3 mb-4">
+                    <div className="w-24 h-24 relative rounded overflow-hidden bg-gray-200">
+                      {item.events?.image_url ? (
+                        <Image
+                          src={item.events.image_url}
+                          alt={item.events.title}
+                          fill
+                          style={{ objectFit: 'cover' }}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <FaTicketAlt className="text-gray-400" size={32} />
+                        </div>
+                      )}
                     </div>
-
-                    <div className="mt-3 flex justify-between items-center">
-                      <div>
-                        <span className="text-gray-600">Jumlah: </span>
-                        <span className="font-medium">{item.quantity} tiket</span>
-                      </div>
-                      <div className="text-blue-600 font-medium">{formatPrice(item.price * item.quantity)}</div>
+                    <div className="flex-1">
+                      <p className="font-semibold">{item.events?.title || 'Event tidak tersedia'}</p>
+                      <p className="text-sm text-gray-500">
+                        <FaCalendarAlt className="inline-block mr-1" /> {item.events?.date || '-'}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        <FaMapMarkerAlt className="inline-block mr-1" /> {item.events?.location || '-'}
+                      </p>
+                      <p className="text-sm mt-1">
+                        Jumlah: {item.quantity} × Rp{item.price.toLocaleString('id-ID')}
+                      </p>
                     </div>
                   </div>
-                </div>
-              ))
-            ) : (
-              <div className="p-4 text-center text-gray-500">Tidak ada item dalam pesanan ini</div>
-            )}
-          </div>
+                ))}
+              </div>
+            </div>
+          ))
+        )}
+      </main>
 
-          <div className="p-4 bg-gray-50 flex justify-between items-center">
-            <div>
-              <p className="text-sm text-gray-600">Metode Pembayaran:</p>
-              <p className="font-medium">{order.payment_method || '-'}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Total:</p>
-              <p className="text-lg font-bold text-blue-600">{formatPrice(order.total_price)}</p>
-            </div>
-          </div>
-        </div>
-      ))}
+      <FooterSectionOrganism />
     </div>
   );
-};
+}
